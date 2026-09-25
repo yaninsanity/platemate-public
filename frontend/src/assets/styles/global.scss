@@ -1,0 +1,39 @@
+@use 'variables' as *; 
+
+// Reset & Base
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  font-family: $font-base;
+  font-size: $font-size-md;
+  background: $color-bg;
+  color: $color-text;
+}
+body, #app {
+  min-height: 100vh;
+  background: $color-bg;
+}
+
+// Utility
+.text-center { text-align: center; }
+.mt-lg        { margin-top: $space-lg; }
+.p-lg         { padding: $space-lg; }
+
+// Buttons
+.btn {
+  @include center-flex;
+  padding: $space-md $space-xl;
+  border-radius: $radius-md;
+  font-size: $font-size-lg;
+  font-weight: 600;
+  cursor: pointer;
+  @include transition(background, transform);
+  &--primary {
+    background: linear-gradient(90deg, $color-primary, $color-accent);
+    color: #fff;
+    &:hover { transform: translateY(-2px); }
+  }
+}

@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block content %}
+<div class="content" style="max-width:840px;">
+  <h1>{{ title }}</h1>
+  <p>Force-queue AI analysis for Entry #{{ entry.id }}. Media count: {{ media_count }}.</p>
+  <form method="post">{% csrf_token %}
+    <input type="submit" class="default" value="Force queue" />
+    <a href="{% url 'admin:couplememory_memoryentry_changelist' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

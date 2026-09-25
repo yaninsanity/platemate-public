@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block content %}
+<div class="content" style="max-width:980px;">
+  <h1>{{ title }}</h1>
+  <p>Entry #{{ entry.id }}</p>
+  <table class="grp-table">
+    <thead><tr><th>⭐</th><th>Name</th><th>Size</th><th>Created</th></tr></thead>
+    <tbody>
+      {% for m in media_files %}
+      <tr>
+        <td>{% if m.is_highlight %}⭐{% endif %}</td>
+        <td>{{ m.media.name }}</td>
+        <td>{{ m.media.size|default:0 }}</td>
+        <td>{{ m.created_at }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">No media</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p><a class="button" href="{% url 'admin:couplememory_memoryentry_change' entry.id %}">Back</a></p>
+</div>
+{% endblock %}

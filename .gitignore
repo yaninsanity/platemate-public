@@ -1,0 +1,30 @@
+*venv*
+.DS_Store
+.env
+*.pyc
+*.dot
+*.DS_Store
+node_modules
+*.sqlite3
+*staticfiles*
+# ---- secrets / credentials: NEVER commit ----
+.env
+.env.local
+.env.*.local
+backend/.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+certs/*
+!certs/.gitkeep
+db.sqlite3
+
+# ---- runtime data & build artifacts: never commit ----
+# Django MEDIA_ROOT holds user uploads
+backend/app/media/
+media/
+staticfiles/
+*.tsbuildinfo

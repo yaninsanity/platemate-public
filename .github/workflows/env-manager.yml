@@ -1,0 +1,44 @@
+name: Env Manager
+
+# The deploy jobs only read this repository; nothing here writes back to it.
+permissions:
+  contents: read
+
+# Deployment target lives in repository variables, not in source.
+# Set these under Settings > Secrets and variables > Actions > Variables:
+#   SERVER_IP, SERVER_USERNAME, DEPLOY_DIR
+env:
+  SERVER_IP: ${{ vars.SERVER_IP }}
+  SERVER_USERNAME: ${{ vars.SERVER_USERNAME }}
+  DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+
+on:
+  workflow_call:
+    outputs:
+      env_json:
+        description: 'A JSON string containing environment variables'
+        value: ${{ jobs.set-env.outputs.env_json }}
+
+jobs:
+  set-env:
+    runs-on: ubuntu-latest
+    outputs:
+      env_json: ${{ steps.set-env.outputs.env_json }}
+    steps:
+      - id: set-env
+        run: |
+          for v in SERVER_IP SERVER_USERNAME DEPLOY_DIR; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Repository variable $v is not set. Define it under Settings > Secrets and variables > Actions > Variables."
+              exit 1
+            fi
+          done
+          json=$(jq -n \
+            --arg server_ip "$SERVER_IP" \
+            --arg server_username "$SERVER_USERNAME" \
+            --arg deploy_dir "$DEPLOY_DIR" \
+            '{server_ip: $server_ip, server_username: $server_username, deploy_dir: $deploy_dir}')
+          
+          echo "env_json<<EOF" >> $GITHUB_OUTPUT
+          echo "$json" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT

@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block content %}
+<div class="content" style="max-width:840px;">
+  <h1>{{ title }}</h1>
+  <form method="post">{% csrf_token %}
+    <label>Choose highlight media:</label>
+    <select name="highlight_media_id">
+      {% for m in media_files %}
+      <option value="{{ m.id }}">{{ m.media.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="default" type="submit">Save</button>
+    <a href="{% url 'admin:couplememory_memoryentry_change' entry.id %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

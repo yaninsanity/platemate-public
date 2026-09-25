@@ -1,0 +1,199 @@
+x-net: &net
+  networks: [platemate_net]
+
+services:
+# ──────────────────────────── ① 后端 ────────────────────────────
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/usr/src/app          # code 热更新
+      - media_data:/usr/src/app/app/media
+      # production runs PostgreSQL, so no SQLite file is mounted
+    working_dir: /usr/src/app/app
+    env_file: [backend/.env]
+    # 不暴露端口到宿主机，只通过HTTPS代理访问
+    # ports: ["911:911"]  
+    environment:
+      - DJANGO_ENV=prod  # 生产环境使用PostgreSQL
+      - USE_HTTPS=true
+    profiles: ["prod"]
+    command: >
+      sh -c "
+        echo 'Starting production server...' &&
+        echo 'Fixing media file links...' &&
+        cd /usr/src/app/app/media/ingredients &&
+        ln -sf eggs.png eggs_RanibiX.png 2>/dev/null || true &&
+        ln -sf flour.png flour_6JEZv6O.png 2>/dev/null || true &&
+        ln -sf garlic.png garlic_PViLVfS.png 2>/dev/null || true &&
+        ln -sf milk.png milk_u64gYN7.png 2>/dev/null || true &&
+        ln -sf random_vegetable.png random_vegetable_K733zrM.png 2>/dev/null || true &&
+        ln -sf butter.png butter_GpzL97E.png 2>/dev/null || true &&
+        ln -sf carrots.png carrots_4TwnwG3.png 2>/dev/null || true &&
+        ln -sf curry.png curry_2IdEUmu.png 2>/dev/null || true &&
+        ln -sf oil.png oil_QZIoXbn.png 2>/dev/null || true &&
+        ln -sf onion.png onion_c0nN3Pb.png 2>/dev/null || true &&
+        ln -sf potato.png potato_1ZcQlzu.png 2>/dev/null || true &&
+        ln -sf rice.png rice_0ZQO4Pi.png 2>/dev/null || true &&
+        ln -sf salt.png salt_vcu91Lu.png 2>/dev/null || true &&
+        ln -sf tomato.png tomato_AhJ3Rqr.png 2>/dev/null || true &&
+        ln -sf random_meat.png random_meat_8fpTwwu.png 2>/dev/null || true &&
+        ln -sf soy_sauce_1.png soy_sauce.png 2>/dev/null || true &&
+        echo 'All media links fixed!' &&
+        cd /usr/src/app/app &&
+        python manage.py collectstatic --noinput --clear &&
+        python manage.py runserver 0.0.0.0:911
+      "
+    <<: *net
+
+  web-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/usr/src/app          # code 热更新
+      - media_data:/usr/src/app/app/media
+      - sqlite_data:/usr/src/app/db.sqlite3
+      - ./certs:/usr/src/app/certs:ro   # SSL证书
+    working_dir: /usr/src/app/app
+    env_file: [ backend/.env ]
+    ports: [ "911:911" ]
+    environment:
+      - DJANGO_ENV=${DJANGO_ENV:-dev}
+    profiles: ["dev"]
+    networks:
+      platemate_net:
+        aliases:
+          - web
+    command: >
+      sh -c "
+        python manage.py makemigrations &&
+        python manage.py migrate --noinput &&
+        python manage.py runserver 0.0.0.0:911
+      "
+    <<: *net
+
+# ───────────────────── ② 前端 · 生产镜像（静态文件） ─────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: prod                       # Dockerfile 中的 prod stage
+      args:
+        VITE_API_BASE_URL: /api
+    depends_on: [web]
+    ports: ["520:520"]
+    environment:
+      VITE_API_BASE_URL: /api
+    profiles: ["prod"]                  # 默认不开；显式 --profile prod 时启用
+    <<: *net
+
+# ─────────────────── ③ 前端 · 开发热加载（vite + HMR） ───────────────────
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    # ⬇️ 把源码挂进去（保持不变）
+    volumes:
+      - ./frontend:/app
+      - node_modules_cache:/app/node_modules   # 依旧复用卷
+    ports: ["520:520"]
+    environment:
+      VITE_API_BASE_URL: http://localhost:911/api
+      BROWSER: none
+    command: >
+      sh -c "
+        corepack enable &&                                # 确保 yarn/pnpm 可用
+        if [ -f yarn.lock ]; then
+          yarn install --prefer-offline --check-files;    # 每次都对齐依赖
+          yarn dev --host 0.0.0.0 --port 520;
+        elif [ -f pnpm-lock.yaml ]; then
+          pnpm install --prefer-offline --check-files;
+          pnpm dev --host 0.0.0.0 --port 520;
+        else
+          npm install --prefer-offline --legacy-peer-deps;
+          npm run dev -- --host 0.0.0.0 --port 520;
+        fi
+      "
+    profiles: ["dev"]
+    <<: *net
+
+# ───────────────────── ④ 极简HTTPS代理 (开发环境) ─────────────────────
+  https-dev:
+    image: nginx:alpine
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+    ports:
+      - "5200:443"   # HTTPS使用5200端口，避免冲突
+    depends_on:
+      - web-dev
+      - frontend-dev
+    profiles: ["https"]
+    command: >
+      sh -c "
+        echo 'server {
+          listen 443 ssl;
+          server_name _;
+          ssl_certificate /etc/nginx/certs/cert.pem;
+          ssl_certificate_key /etc/nginx/certs/key.pem;
+          ssl_protocols TLSv1.2 TLSv1.3;
+          
+          location /api/ {
+            proxy_pass http://web-dev:911;
+            proxy_set_header Host \$$host;
+            proxy_set_header X-Forwarded-Proto https;
+          }
+          
+          location /admin/ {
+            proxy_pass http://web-dev:911;
+            proxy_set_header Host \$$host;
+            proxy_set_header X-Forwarded-Proto https;
+          }
+          
+          location /certs/ {
+            proxy_pass http://web-dev:911;
+            proxy_set_header Host \$$host;
+          }
+          
+          location / {
+            proxy_pass http://frontend-dev:520;
+            proxy_set_header Host \$$host;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Real-IP \$$remote_addr;
+            proxy_set_header X-Forwarded-For \$$proxy_add_x_forwarded_for;
+            
+            # WebSocket支持
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade \$$http_upgrade;
+            proxy_set_header Connection "upgrade";
+          }
+        }' > /etc/nginx/conf.d/default.conf &&
+        nginx -g 'daemon off;'
+      "
+    <<: *net
+
+# ───────────────────── ⑤ HTTPS代理 (生产环境) ─────────────────────
+  https-prod:
+    image: nginx:alpine
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx-https.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "5200:443"     # HTTPS前端端口 (外部5200映射到内部443)
+    depends_on:
+      - web
+      - frontend
+    profiles: ["prod"]
+    <<: *net
+
+
+volumes:
+  media_data: {}
+  sqlite_data: {}
+  node_modules_cache: {}
+
+networks:
+  platemate_net:
+    name: platemate_net

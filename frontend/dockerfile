@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1
+
+######################## 依赖层 ########################
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+# ① 只复制依赖清单（带星号可容忍不存在）
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# ② 装依赖：按锁文件判断包管理器
+RUN \
+  if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+  elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  else npm install; fi
+
+RUN npm install html-to-image@1.11.11
+
+########################▍dev 阶段▍#####################
+FROM node:20-alpine AS dev
+WORKDIR /app
+
+#   ⬇️ 只复制 package.json & lock ──> 让 yarn 在容器里装
+COPY package.json yarn.lock* pnpm-lock.yaml* package-lock.json* ./
+
+# corepack picks between yarn, pnpm and npm
+RUN corepack enable && \
+    if [ -f yarn.lock ];       then yarn install --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    else npm install; fi
+
+# ✅ “dev” 镜像里 **不要** COPY 源码 / node_modules
+#    它只提供一个最快启动的 base layer
+
+########################▍build 阶段▍####################
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+RUN npm run build        # 或 yarn build
+
+########################▍prod 阶段▍#####################
+FROM node:20-alpine AS prod
+WORKDIR /app
+RUN npm i -g serve
+COPY --from=build /app/dist ./dist
+EXPOSE 520
+CMD ["serve","-s","dist","-l","520"]
