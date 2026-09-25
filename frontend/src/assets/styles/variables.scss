@@ -1,0 +1,50 @@
+// ——— PlateMate Design Tokens ———
+
+// Palette
+$color-primary:        #4caf50 !default;   // 生命绿
+$color-secondary:      #ff7043 !default;   // 活力橙
+$color-accent:         #03a9f4 !default;   // 疾风蓝
+
+$color-bg:             #f9fafb !default;   // 整体验白
+$color-surface:        #ffffff !default;   // 卡片底色
+$color-border:         #e5e7eb !default;   // 细线
+$color-text:           #1f2937 !default;   // 主文字
+$color-text-secondary: #4b5563 !default;   // 次文字
+
+// Typography
+$font-base:            'Roboto', sans-serif !default;
+$font-heading:         'Montserrat', sans-serif !default;
+
+$font-size-xs:  0.75rem !default;   // 12px
+$font-size-sm:  0.875rem !default;  // 14px
+$font-size-md:  1rem !default;      // 16px
+$font-size-lg:  1.25rem !default;   // 20px
+$font-size-xl:  1.5rem !default;    // 24px
+$font-size-2xl: 2rem !default;      // 32px
+
+// Spacing
+$space-xs: 4px  !default;
+$space-sm: 8px  !default;
+$space-md: 16px !default;
+$space-lg: 24px !default;
+$space-xl: 32px !default;
+
+// Radius & Shadow
+$radius-sm:   6px  !default;
+$radius-md:   12px !default;
+$radius-lg:   24px !default;
+$shadow-card: 0 4px 12px rgba(0,0,0,0.08) !default;
+
+// Transition
+$break-sm:      640px !default;
+$ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1) !default;
+@mixin transition($props...) {
+  transition: $props 250ms $ease-in-out;
+}
+
+// Helpers
+@mixin center-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

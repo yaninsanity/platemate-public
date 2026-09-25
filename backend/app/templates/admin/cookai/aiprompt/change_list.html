@@ -1,0 +1,15 @@
+{# stays compatible with older or third-party object-tools by safely <li> 放进 <ul> #}
+{% block object-tools %}
+  {{ block.super }}
+  {% if block.super|length == 0 %}
+    <ul class="object-tools">
+      {% block object-tools-items %}
+        <li>
+          <a href="{% url 'admin:cookai-openai-test' %}" class="addlink">
+            {% translate "OpenAI Playground" %}
+          </a>
+        </li>
+      {% endblock %}
+    </ul>
+  {% endif %}
+{% endblock %}

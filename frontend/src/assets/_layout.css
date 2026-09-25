@@ -1,0 +1,18 @@
+/* src/assets/_layout.css */
+
+/* full-height baseline */
+html, body, #app, .v-application {
+  height: 100%;
+  margin: 0;
+}
+
+/* safe-area padding for iOS bottom bars (optional) */
+body {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* make all pages inherit transparent background by default */
+.page-gradient-bg {
+  min-height: 100%;
+  background: linear-gradient(135deg, #e6f1ff, #fff0f8);
+}

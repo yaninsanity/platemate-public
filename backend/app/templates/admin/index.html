@@ -1,0 +1,58 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+<style>
+  .playground-card {
+    display: flex;
+    align-items: center;
+    background-color: #f0f8ff;
+    border: 1px solid #cceeff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .playground-card .icon-container {
+    flex: 0 0 auto;
+    width: 4rem;
+    height: 4rem;
+    background-color: #d0eaff;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+  }
+  .playground-card h5 {
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .playground-card p {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="playground-card">
+        <div class="icon-container">
+          <i class="fas fa-robot fa-2x text-info"></i>
+        </div>
+        <div class="flex-grow-1">
+          <h5>AI Playground</h5>
+          <p>Quickly test PlateMate’s AI endpoints</p>
+          <a href="{% url 'admin:cookai-openai-test' %}" class="btn btn-sm btn-info">
+            Launch <i class="fas fa-external-link-alt ml-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ block.super }}
+{% endblock %}

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# platemate secret-guard hook. No dependencies: git + grep only.
+# Enable with: git config core.hooksPath .githooks
+set -uo pipefail
+
+RED=$'\033[31m'; YEL=$'\033[33m'; NC=$'\033[0m'
+fail=0
+
+staged() { git diff --cached --name-only --diff-filter=ACMR; }
+
+# ---- 1. Credential file paths ----
+BLOCKED='(^|/)\.env$|(^|/)\.env\.(local|prod|production)$|\.pem$|\.key$|\.p12$|\.pfx$|\.jks$|\.keystore$|\.sqlite3$|(^|/)id_rsa$'
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  if printf '%s' "$f" | grep -qE "$BLOCKED"; then
+    echo "${RED}x Refusing to commit a credential file:${NC} $f"
+    fail=1
+  fi
+done < <(staged)
+
+# ---- 2. Key fingerprints in staged content ----
+PATTERNS='sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}|sk-proj-[A-Za-z0-9_-]{40,}|sk-ant-[A-Za-z0-9_-]{40,}|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|-----BEGIN (RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----|SECRET_KEY\s*=\s*.django-insecure-'
+hits=$(git diff --cached -U0 --diff-filter=ACMR | grep -E '^\+' | grep -vE '^\+\+\+' | grep -nEo "$PATTERNS" | head -5)
+if [ -n "$hits" ]; then
+  echo "${RED}x Possible secret detected in staged content:${NC}"
+  printf '%s\n' "$hits" | sed -E 's/^/    /; s/(.{16}).*/\1…(truncated)/'
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  cat <<MSG
+
+${YEL}Commit blocked.${NC}
+  - Put secrets in backend/.env (gitignored). Template: backend/.env.example
+  - Genuine false positive?  git commit --no-verify
+  - Already committed a secret? Rotate it. Editing the file is not enough. See SECURITY.md
+MSG
+  exit 1
+fi
+exit 0

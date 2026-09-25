@@ -1,0 +1,18 @@
+PlateMate — contributors
+========================
+
+Copyright in this repository is held jointly by the people below; "The
+PlateMate authors" in LICENSE refers to this list.
+
+Figures are from the private repository this release was cut from, counting
+every commit on every branch. Lines are additions plus deletions, so they
+measure churn rather than surviving code.
+
+    Zeren Yan       @yaninsanity         400 commits    ~189,000 lines
+    Justin Zhang    @justinzhang2023F    207 commits     ~31,600 lines
+    ZX              @xz-zx                82 commits     ~16,000 lines
+    ArcsZhang       @ArcsZhang            19 commits          15 lines
+    WeiluWang       @WeiluWang             8 commits         431 lines
+
+The published history starts from a single commit, so per-file authorship
+cannot be recovered from this repository. It remains in the private one.
