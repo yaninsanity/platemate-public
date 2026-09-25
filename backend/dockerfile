@@ -1,0 +1,20 @@
+FROM python:3.13-slim
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential libpq-dev graphviz graphviz-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Enter the directory where manage.py is located
+WORKDIR /usr/src/app/app
+
+EXPOSE 911
+ENV PYTHONUNBUFFERED=1
+
+# Remove migrations, handled by docker-compose
+CMD ["python", "manage.py", "runserver", "0.0.0.0:911"]

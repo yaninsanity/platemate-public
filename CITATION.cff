@@ -1,0 +1,71 @@
+cff-version: 1.2.0
+title: "PlateMate"
+message: >-
+  If you use this software in academic work, please cite the OZCHI '25 paper
+  rather than the repository itself.
+type: software
+abstract: >-
+  Research artifact for the OZCHI '25 paper "PlateMate: Structured Guidance
+  Design in Relatedness Technology for Remote Joint Activity". PlateMate is a
+  Django REST and Vue 3 application in which geographically separated partners
+  cook in weekly rounds, submit photographs of the result for AI judging, and
+  raise a shared virtual pet from the outcome.
+authors:
+  - family-names: Wang
+    given-names: Wei-Lu
+    affiliation: "Department of Computer Science, Virginia Tech, Blacksburg, Virginia, USA"
+  - family-names: Yan
+    given-names: Zeren
+    affiliation: "Trine University, Angola, Indiana, USA"
+  - family-names: Zheng
+    given-names: Xian
+    affiliation: "Trine University, Angola, Indiana, USA"
+  - family-names: Zhang
+    given-names: Wuyou
+    affiliation: "Department of Computer Science, Virginia Polytechnic Institute and State University, Blacksburg, Virginia, USA"
+  - family-names: Cao
+    given-names: Yufei
+    affiliation: "Game Lab, The Australian National University, Canberra, ACT, Australia"
+  - family-names: McCrickard
+    given-names: D. Scott
+    affiliation: "Department of Computer Science, Virginia Tech, Blacksburg, Virginia, USA"
+license: MIT
+repository-code: "https://github.com/yaninsanity/platemate-public"
+keywords:
+  - human-computer interaction
+  - relatedness
+  - remote joint activity
+  - structured guidance
+  - gamification
+preferred-citation:
+  type: conference-paper
+  title: "PlateMate: Structured Guidance Design in Relatedness Technology for Remote Joint Activity"
+  doi: "10.1145/3764687.3769926"
+  year: 2025
+  month: 11
+  start: 755
+  end: 762
+  collection-title: "Proceedings of the 37th Australian Conference on Human-Computer Interaction"
+  conference:
+    name: "OZCHI '25: 37th Australian Conference on Human-Computer Interaction"
+  publisher:
+    name: "Association for Computing Machinery"
+  authors:
+    - family-names: Wang
+      given-names: Wei-Lu
+      affiliation: "Department of Computer Science, Virginia Tech, Blacksburg, Virginia, USA"
+    - family-names: Yan
+      given-names: Zeren
+      affiliation: "Trine University, Angola, Indiana, USA"
+    - family-names: Zheng
+      given-names: Xian
+      affiliation: "Trine University, Angola, Indiana, USA"
+    - family-names: Zhang
+      given-names: Wuyou
+      affiliation: "Department of Computer Science, Virginia Polytechnic Institute and State University, Blacksburg, Virginia, USA"
+    - family-names: Cao
+      given-names: Yufei
+      affiliation: "Game Lab, The Australian National University, Canberra, ACT, Australia"
+    - family-names: McCrickard
+      given-names: D. Scott
+      affiliation: "Department of Computer Science, Virginia Tech, Blacksburg, Virginia, USA"

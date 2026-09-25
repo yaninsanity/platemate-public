@@ -1,0 +1,15 @@
+{# templates/admin/app_index.html #}
+{% extends "admin/app_index.html" %}
+{% load i18n %}
+
+{% block object-tools %}
+  {{ block.super }}
+  {# 仅当在 cookai 这个 app 下面时显示 #}
+  {% if app_label == 'cookai' %}
+    <li>
+      <a href="{% url 'admin:cookai-openai-test' %}" class="addlink">
+        {% translate 'OpenAI Playground' %}
+      </a>
+    </li>
+  {% endif %}
+{% endblock %}

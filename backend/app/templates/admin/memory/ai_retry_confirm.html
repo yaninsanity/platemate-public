@@ -1,0 +1,19 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block content %}
+<div class="content" style="max-width:840px;">
+  <h1>{{ title }}</h1>
+  <p>
+    Entry #{{ entry.id }} by {{ entry.author.username }}
+    — Media: {{ media_count }} file{{ media_count|pluralize }}.
+  </p>
+  {% if has_existing_analysis %}
+  <div class="warning">This will delete existing AIJudgment and queue a fresh analysis.</div>
+  {% endif %}
+  <form method="post">{% csrf_token %}
+    <input type="submit" class="default" value="Queue AI analysis" />
+    <a href="{% url 'admin:couplememory_memoryentry_changelist' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

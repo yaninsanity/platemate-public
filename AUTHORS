@@ -1,0 +1,35 @@
+PlateMate — authors and contributors
+====================================
+
+This repository is the research artifact for an OZCHI '25 paper. The paper
+authors are listed first, in publication order; see CITATION.cff for the full
+citation.
+
+Paper authors
+-------------
+
+    Wei-Lu Wang        Virginia Tech                        @WeiluWang
+    Zeren Yan          Trine University                     @yaninsanity
+    Xian Zheng         Trine University                     @xz-zx
+    Wuyou Zhang        Virginia Tech                        @justinzhang2023F
+    Yufei Cao          The Australian National University   @yufeicyf
+    D. Scott McCrickard  Virginia Tech
+
+Copyright in the code is held jointly by those who wrote it. "The PlateMate
+authors" in LICENSE refers to this list.
+
+Code contribution
+-----------------
+
+Figures come from the private repository this release was cut from, counting
+every commit on every branch. Lines are additions plus deletions, so they
+measure churn rather than surviving code.
+
+    @yaninsanity         400 commits    ~189,000 lines
+    @justinzhang2023F    207 commits     ~31,600 lines
+    @xz-zx                82 commits     ~16,000 lines
+    @ArcsZhang            19 commits          15 lines
+    @WeiluWang             8 commits         431 lines
+
+The published history starts from a single commit, so per-file authorship
+cannot be recovered here. It remains in the private repository.

@@ -1,0 +1,45 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block content %}
+<div class="content" style="max-width:980px;">
+  <h1>{{ title }}</h1>
+  <p>Entry #{{ debug_info.entry.id }} — Author: {{ debug_info.entry.author.username }}</p>
+  
+  <h3>AI Raw Output (Latest)</h3>
+  {% if debug_info.ai_raw_output %}
+  <pre style="background:#f8f9fa;padding:12px;border-radius:4px;font-size:11px;overflow:auto;">{{ debug_info.ai_raw_output|pprint }}</pre>
+  {% else %}<p>No raw AI output available</p>{% endif %}
+  
+  <h3>System Status</h3>
+  <pre>{{ debug_info.system_status|safe }}</pre>
+  
+  <h3>Media Files</h3>
+  <ul>
+    {% for m in debug_info.media_files %}
+    <li>{{ m.media.name }} {% if m.is_highlight %}⭐{% endif %}</li>
+    {% empty %}<li>No media</li>{% endfor %}
+  </ul>
+  
+  <h3>Current AI Judgment</h3>
+  {% if debug_info.ai_judgment %}
+  <table style="border-collapse:collapse;width:100%;font-size:12px;">
+    <tr><td style="border:1px solid #ddd;padding:4px;"><strong>Overall Score:</strong></td><td style="border:1px solid #ddd;padding:4px;">{{ debug_info.ai_judgment.overall_score }}</td></tr>
+    <tr><td style="border:1px solid #ddd;padding:4px;"><strong>Visual Appeal:</strong></td><td style="border:1px solid #ddd;padding:4px;">{{ debug_info.ai_judgment.visual_appeal }}</td></tr>
+    <tr><td style="border:1px solid #ddd;padding:4px;"><strong>Cooking Technique:</strong></td><td style="border:1px solid #ddd;padding:4px;">{{ debug_info.ai_judgment.cooking_technique }}</td></tr>
+    <tr><td style="border:1px solid #ddd;padding:4px;"><strong>Ingredient Freshness:</strong></td><td style="border:1px solid #ddd;padding:4px;">{{ debug_info.ai_judgment.ingredient_freshness }}</td></tr>
+    <tr><td style="border:1px solid #ddd;padding:4px;"><strong>Confidence:</strong></td><td style="border:1px solid #ddd;padding:4px;">{{ debug_info.ai_judgment.confidence }}</td></tr>
+    <tr><td style="border:1px solid #ddd;padding:4px;"><strong>Comment:</strong></td><td style="border:1px solid #ddd;padding:4px;">{{ debug_info.ai_judgment.ai_comment }}</td></tr>
+  </table>
+  {% else %}<p>No AIJudgment record yet.</p>{% endif %}
+  
+  <h3>Recommendations</h3>
+  <ul>
+    {% for r in debug_info.recommendations %}
+    <li>[{{ r.type }}] {{ r.message }} — {{ r.action }}</li>
+    {% empty %}<li>None</li>{% endfor %}
+  </ul>
+  
+  <p><a class="button" href="{% url 'admin:couplememory_memoryentry_changelist' %}">Back to Entries</a></p>
+</div>
+{% endblock %}

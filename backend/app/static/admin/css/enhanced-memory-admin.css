@@ -1,0 +1,193 @@
+/* Enhanced Memory Admin CSS */
+
+/* Improve table layout and spacing */
+.admin-enhanced-memory-entry #changelist .results {
+    overflow-x: auto;
+}
+
+.admin-enhanced-memory-entry #changelist table {
+    min-width: 1200px;
+}
+
+.admin-enhanced-memory-entry .field-ai_score_visual {
+    text-align: center;
+    min-width: 100px;
+}
+
+.admin-enhanced-memory-entry .field-author_display {
+    min-width: 150px;
+}
+
+.admin-enhanced-memory-entry .field-content_preview {
+    max-width: 300px;
+}
+
+/* Enhanced button styling */
+.admin-enhanced-memory-entry .ai-action-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.admin-enhanced-memory-entry .ai-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Status indicators */
+.admin-enhanced-memory-entry .status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+}
+
+/* Progress bars */
+.admin-enhanced-memory-entry .ai-score-progress {
+    width: 60px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    margin: 2px auto;
+    overflow: hidden;
+}
+
+.admin-enhanced-memory-entry .ai-score-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Enhanced panels in forms */
+.admin-enhanced-memory-entry .info-panel {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.admin-enhanced-memory-entry .info-panel h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.admin-enhanced-memory-entry .info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    align-items: center;
+}
+
+/* Media preview improvements */
+.admin-enhanced-memory-entry .media-preview {
+    text-align: center;
+    padding: 16px;
+}
+
+.admin-enhanced-memory-entry .media-preview img {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Action buttons styling */
+.admin-enhanced-memory-entry .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.admin-enhanced-memory-entry .btn-primary {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.admin-enhanced-memory-entry .btn-success {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.admin-enhanced-memory-entry .btn-danger {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.admin-enhanced-memory-entry .btn-warning {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+/* Responsive improvements */
+@media (max-width: 1024px) {
+    .admin-enhanced-memory-entry #changelist table {
+        min-width: 800px;
+    }
+    
+    .admin-enhanced-memory-entry .field-content_preview {
+        max-width: 200px;
+    }
+}
+
+/* Admin form improvements */
+.admin-enhanced-memory-entry .form-row {
+    margin-bottom: 16px;
+}
+
+.admin-enhanced-memory-entry .form-row .help {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Enhanced fieldset styling */
+.admin-enhanced-memory-entry fieldset.collapse {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin: 16px 0;
+}
+
+.admin-enhanced-memory-entry fieldset h2 {
+    background: #f8f9fa;
+    margin: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.admin-enhanced-memory-entry .collapse .form-row {
+    padding: 0 16px;
+}
+
+/* Loading and error states */
+.admin-enhanced-memory-entry .loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.admin-enhanced-memory-entry .error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+}
+
+.admin-enhanced-memory-entry .success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+}

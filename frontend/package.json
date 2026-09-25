@@ -1,0 +1,50 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@types/html2canvas": "^0.5.35",
+    "@vueuse/core": "^13.3.0",
+    "@vueuse/gesture": "^2.0.0",
+    "axios": "^1.16.0",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "dom-to-image-more": "^3.6.0",
+    "heic2any": "^0.0.4",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
+    "luxon": "^3.7.1",
+    "pinia": "^2.3.1",
+    "three": "^0.177.0",
+    "v-dynamic-island": "^0.1.0",
+    "vue": "^3.5.18",
+    "vue-i18n": "^11.1.5",
+    "vue-router": "^4.5.1",
+    "vue3-emoji-picker": "^1.1.8",
+    "vuetify": "^3.8.9"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.6.2",
+    "@types/node": "^24.0.1",
+    "@types/three": "^0.177.0",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-vue-jsx": "^4.2.0",
+    "@vue/tsconfig": "^0.7.0",
+    "sass": "^1.89.2",
+    "sass-loader": "^16.0.5",
+    "typescript": "~5.8.3",
+    "unplugin-auto-import": "^19.3.0",
+    "unplugin-vue-components": "^28.7.0",
+    "vite": "^6.4.3",
+    "vite-plugin-vuetify": "^2.1.1",
+    "vue-tsc": "^2.2.8"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

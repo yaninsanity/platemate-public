@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block content %}
+<div class="content" style="max-width:840px;">
+  <h1>{{ title }}</h1>
+  <form method="post">{% csrf_token %}
+    <button name="action" value="approve" class="button">Approve</button>
+    <button name="action" value="flag" class="button">Flag</button>
+    <button name="action" value="delete" class="deletelink">Delete</button>
+    <a href="{% url 'admin:couplememory_memoryentry_changelist' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

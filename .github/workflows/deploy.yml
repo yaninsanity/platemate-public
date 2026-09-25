@@ -1,0 +1,30 @@
+name: PlateMate CI/CD Workflow
+
+# The deploy jobs only read this repository; nothing here writes back to it.
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+      - add_cicd
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
+  workflow_dispatch:
+
+jobs:
+  setup-env:
+    uses: ./.github/workflows/env-manager.yml
+
+  docker-deployment:
+    needs: setup-env
+    uses: ./.github/workflows/docker-deployment.yml
+    with:
+      env_json: ${{ needs.setup-env.outputs.env_json }}
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+      TLS_CERT_PEM: ${{ secrets.TLS_CERT_PEM }}
+      TLS_KEY_PEM: ${{ secrets.TLS_KEY_PEM }}
