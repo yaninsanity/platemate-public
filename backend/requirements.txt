@@ -24,7 +24,7 @@ django-modeladmin-reorder-reborn==0.1.4
 django-object-actions==5.0.0
 django-rest-authtoken==2.1.4
 django-widget-tweaks==1.5.0
-djangorestframework==3.16.0
+djangorestframework==3.17.2
 dnspython==2.7.0
 h11==0.16.0
 httpcore==1.0.9
