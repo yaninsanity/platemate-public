@@ -1,0 +1,131 @@
+{# templates/admin/cookai/openai_test.html #}
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extrahead %}
+<style>
+  :root{--gap:1.2rem;--c-bd:#d0d0d0;--c-ac:#007bff;--c-bg:#fafafa}
+  .box       {max-width:740px;margin:2rem auto;padding:1.6rem;background:var(--c-bg);
+              border:1px solid var(--c-bd);border-radius:8px}
+  .box h1    {text-align:center;margin-bottom:var(--gap);font-size:1.7rem}
+  .row       {margin-bottom:var(--gap)}
+  label      {font-weight:600;margin-bottom:.35rem;display:block}
+  input,select,textarea{width:100%;padding:.55rem;border:1px solid var(--c-bd);border-radius:4px}
+  /* --- drag zone --- */
+  .dz        {border:2px dashed #888;padding:1rem;text-align:center;cursor:pointer;border-radius:6px;background:#fff;transition:.2s}
+  .dz.drag   {background:#e8f4ff;border-color:var(--c-ac)}
+  .pre       {max-width:100%;max-height:160px;margin-top:.4rem;border-radius:4px;display:none}
+  .btn-row   {text-align:center;margin-top:1.6rem}
+  .btn       {background:var(--c-ac);color:#fff;padding:.65rem 1.4rem;border:none;border-radius:4px;font-size:.95rem;cursor:pointer}
+  .btn:hover {background:#0056b3}
+  .res       {white-space:pre-wrap;background:#fff;border:1px solid var(--c-bd);padding:1rem;border-radius:4px;
+              font-family:monospace;max-height:340px;overflow:auto;margin-top:1.3rem}
+  .errors    {color:#c00;font-size:.85rem;margin-top:.3rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="box">
+  <h1>{{ title }}</h1>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {# ---------- Mode ---------- #}
+    <div class="row">
+      <label for="{{ form.mode.id_for_label }}">Mode</label>
+      {{ form.mode }}
+    </div>
+    <p id="mode-desc" style="color:#555;margin:-.2rem 0 var(--gap)"></p>
+
+    {# ---------- Image 1 ---------- #}
+    <div class="row grp grp-score grp-compare grp-detect">
+      <label>Image 1 (URL or Upload)</label>
+      {{ form.image1_url }}
+      <div class="dz" data-input="#{{ form.image1_file.id_for_label }}">
+        Drag-drop / click to upload
+        {{ form.image1_file }}
+        <img class="pre" id="prev1">
+      </div>
+      {% for e in form.image1_url.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+      {% for e in form.image1_file.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    {# ---------- Image 2 (compare only) ---------- #}
+    <div class="row grp grp-compare" style="display:none">
+      <label>Image 2 (URL or Upload)</label>
+      {{ form.image2_url }}
+      <div class="dz" data-input="#{{ form.image2_file.id_for_label }}">
+        Drag-drop / click to upload
+        {{ form.image2_file }}
+        <img class="pre" id="prev2">
+      </div>
+      {% for e in form.image2_url.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+      {% for e in form.image2_file.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    {# ---------- Targets (detect only) ---------- #}
+    <div class="row grp grp-detect" style="display:none">
+      <label for="{{ form.targets.id_for_label }}">Targets (comma-separated)</label>
+      {{ form.targets }}
+      {% for e in form.targets.errors %}<div class="errors">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="btn-row"><button class="btn" type="submit">Run</button></div>
+  </form>
+
+  {# ---------- Result ---------- #}
+  {% if result is not None %}
+    <h2 style="margin-top:2rem">Result</h2>
+    {{ result|json_script:"json-res" }}
+    <pre class="res" id="res-box"></pre>
+    <script>
+      document.addEventListener("DOMContentLoaded",()=>{
+        const raw=document.getElementById("json-res").textContent;
+        try{document.getElementById("res-box").textContent=
+            JSON.stringify(JSON.parse(raw),null,2);}
+        catch{document.getElementById("res-box").textContent=raw;}
+      });
+    </script>
+  {% endif %}
+</div>
+
+{# ---------- JS helpers ---------- #}
+<script>
+/* --- 1. mode toggle --- */
+const modeSel=document.getElementById('{{ form.mode.id_for_label }}');
+const desc   =document.getElementById('mode-desc');
+const text   ={score:'★ 1 photo → PlateMate scores 0-100',
+               compare:'★ 2 photos → PlateMate picks winner',
+               detect:'★ 1 photo (+ targets) → PlateMate lists ingredients'};
+function toggle(){
+  const m=modeSel.value;
+  document.querySelectorAll('.grp').forEach(el=>{
+    const need=el.className.includes('grp-'+m);
+    el.style.display=need?'block':'none';
+  });
+  desc.textContent=text[m]||'';
+}
+modeSel.addEventListener('change',toggle); document.addEventListener('DOMContentLoaded',toggle);
+
+/* --- 2. drag-n-drop + preview --- */
+document.querySelectorAll('.dz').forEach(z=>{
+  const inp=document.querySelector(z.dataset.input);
+  z.addEventListener('click',()=>inp.click());
+  ['dragenter','dragover'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.add('drag');}));
+  ['dragleave','dragend','drop'].forEach(ev=>z.addEventListener(ev,()=>z.classList.remove('drag')));
+  z.addEventListener('drop',e=>{
+    e.preventDefault(); if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files; preview(inp);}
+  });
+  inp.addEventListener('change',()=>preview(inp));
+});
+function preview(inp){
+  const img=inp.closest('.dz').querySelector('.pre');
+  if(!inp.files.length){img.style.display='none';return;}
+  const file=inp.files[0]; if(!file.type.startsWith('image')) return;
+  img.src=URL.createObjectURL(file); img.style.display='block';
+}
+</script>
+{% endblock %}

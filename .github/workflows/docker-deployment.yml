@@ -1,0 +1,136 @@
+name: Docker Deployment
+
+# The deploy jobs only read this repository; nothing here writes back to it.
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      env_json:
+        description: 'A JSON string with environment variables'
+        required: true
+        type: string
+    secrets:
+      SSH_PRIVATE_KEY:
+        description: 'SSH private key for connecting to the remote server'
+        required: true
+      BACKEND_ENV:
+        description: 'Contents of backend/.env, provisioned onto the host at deploy time'
+        required: true
+      TLS_CERT_PEM:
+        description: 'Contents of certs/cert.pem'
+        required: true
+      TLS_KEY_PEM:
+        description: 'Contents of certs/key.pem'
+        required: true
+
+jobs:
+  deploy-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+
+      - name: Setup Environment Variables
+        id: parse-env
+        run: |
+          echo "Parsing environment variables from JSON..."
+          SERVER_IP=$(echo '${{ inputs.env_json }}' | jq -r '.server_ip')
+          SERVER_USERNAME=$(echo '${{ inputs.env_json }}' | jq -r '.server_username')
+          DEPLOY_DIR=$(echo '${{ inputs.env_json }}' | jq -r '.deploy_dir')
+          echo "SERVER_IP=$SERVER_IP" >> $GITHUB_ENV
+          echo "SERVER_USERNAME=$SERVER_USERNAME" >> $GITHUB_ENV
+          echo "DEPLOY_DIR=$DEPLOY_DIR" >> $GITHUB_ENV
+
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@836c84ec59a0e7bc0eabc79988384eb567561ee2  # v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add Server to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+      - name: Transfer Application Files
+        run: |
+          echo "🚀 Transferring code to the server..."
+          ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_IP "rm -rf $DEPLOY_DIR"
+          scp -o StrictHostKeyChecking=no -r . $SERVER_USERNAME@$SERVER_IP:$DEPLOY_DIR
+          echo "✅ File transfer complete"
+
+      # The step above wipes $DEPLOY_DIR with `rm -rf` on every deploy, so anything
+      # placed on the host by hand does not survive. Credentials are not in the
+      # repository either, so they are written here from repository secrets.
+      # This step is what makes the deploy self-sufficient.
+      - name: Provision runtime configuration
+        env:
+          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+          TLS_CERT_PEM: ${{ secrets.TLS_CERT_PEM }}
+          TLS_KEY_PEM: ${{ secrets.TLS_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          echo "🔐 Writing runtime configuration onto the host..."
+          SSH="ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_IP"
+
+          $SSH "mkdir -p '$DEPLOY_DIR/backend' '$DEPLOY_DIR/certs'"
+          printf '%s\n' "$BACKEND_ENV"  | $SSH "cat > '$DEPLOY_DIR/backend/.env'  && chmod 600 '$DEPLOY_DIR/backend/.env'"
+          printf '%s\n' "$TLS_CERT_PEM" | $SSH "cat > '$DEPLOY_DIR/certs/cert.pem' && chmod 644 '$DEPLOY_DIR/certs/cert.pem'"
+          printf '%s\n' "$TLS_KEY_PEM"  | $SSH "cat > '$DEPLOY_DIR/certs/key.pem'  && chmod 600 '$DEPLOY_DIR/certs/key.pem'"
+
+          echo "🔎 Verifying (values are never printed)..."
+          $SSH "
+            set -eu
+            cd '$DEPLOY_DIR'
+            test -s backend/.env   || { echo '::error::backend/.env is empty'; exit 1; }
+            test -s certs/cert.pem || { echo '::error::certs/cert.pem is empty'; exit 1; }
+            test -s certs/key.pem  || { echo '::error::certs/key.pem is empty'; exit 1; }
+            grep -q '^DJANGO_SECRET_KEY=.\+' backend/.env || { echo '::error::DJANGO_SECRET_KEY missing or empty'; exit 1; }
+            grep -q '^DJANGO_ENV=.\+'        backend/.env || { echo '::error::DJANGO_ENV missing or empty — Django would silently fall back to SQLite'; exit 1; }
+            echo -n '  variables present: '
+            cut -d= -f1 backend/.env | grep '^[A-Z]' | tr '\n' ' '
+            echo
+          "
+          echo "✅ Runtime configuration in place"
+
+      - name: Deploy Docker Containers
+        run: |
+          echo "🚀 Starting docker deployment on remote server..."
+          ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_IP "
+            set -e
+            cd $DEPLOY_DIR
+
+            # Add some debug information
+            echo '📋 Current code version:'
+            git log --oneline -1
+
+            # Check if docker-compose.yml exists
+            if [ ! -f 'docker-compose.yml' ]; then
+              echo '❌ Error: docker-compose.yml not found'
+              exit 1
+            fi
+
+            echo '📌 Stopping dev containers...'
+            docker-compose --profile dev down --remove-orphans || true
+
+            echo '📌 Stopping prod containers...'
+            docker-compose --profile prod down --remove-orphans || true
+
+            echo '🚀 Building new Docker image for prod...'
+            # Build the 'web' service first to ensure any dependencies are resolved before building 'frontend'.
+            docker-compose build --no-cache web
+            # Build the 'frontend' service with a more thorough rebuild to avoid caching issues with frontend assets.
+            docker-compose build --no-cache --pull frontend
+
+            echo '🚀 Starting prod containers...'
+            docker-compose --profile prod up -d --force-recreate --remove-orphans
+
+            echo '⏳ Waiting for services to start...'
+            sleep 15
+
+            echo '🔍 Checking container status...'
+            docker-compose ps
+
+            echo '✅ Docker deployment successful!'
+          "
