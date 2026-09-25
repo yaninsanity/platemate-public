@@ -13,7 +13,7 @@
     "@types/html2canvas": "^0.5.35",
     "@vueuse/core": "^13.3.0",
     "@vueuse/gesture": "^2.0.0",
-    "axios": "^1.10.0",
+    "axios": "^1.18.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dom-to-image-more": "^3.6.0",
